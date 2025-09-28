@@ -35,12 +35,8 @@ public class CharacterController : MonoBehaviour
 
     [Header ("Dash variables")]
     [SerializeField] private float dashSpeed = 20f;    
-    [SerializeField] private float dashDuration = 0.2f;
-    [SerializeField] private float dashCooldown = 1f;
-    private bool isDashing = false;
-    private bool canDash = true;
-    private float dashTimeStart;
-
+    public float dashDuration = 0.2f;
+    public float dashTimeStart;
 
     private void Awake()
     {
@@ -57,19 +53,27 @@ public class CharacterController : MonoBehaviour
     private void Update()
     {
         Gravity();
-
-        if(!canDash && !isDashing && Time.time > dashTimeStart + dashDuration + dashCooldown)
-        {
-            canDash = true;
-        }
     }
 
     void FixedUpdate()
     {
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundedRadius, whatIsGround);
+
+        //dash movement
+        if (movement.isDashing)
+        {
+            if (Time.time < dashTimeStart + dashDuration)
+            {
+                rb.velocity = new Vector2(facing * dashSpeed, 0);
+            }
+            else
+            {
+                movement.isDashing = false;
+            }
+        }
     }
 
-    public void Move(float move, bool jump, bool dash)
+    public void Move(float move, bool jump)
     {
         //move the character
         Vector3 targetVelocity = new Vector2(move * 10f, rb.velocity.y);
@@ -93,27 +97,6 @@ public class CharacterController : MonoBehaviour
             //add a vertical force to the player
             isGrounded = false;
             rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
-        }
-
-        //check if the player should dash
-        if (dash && !isDashing && canDash)
-        {
-            dashTimeStart = Time.time;            
-            isDashing = true;
-            canDash = false;
-        }
-
-        //dash movement
-        if (isDashing)
-        {
-            if (Time.time < dashTimeStart + dashDuration)
-            {
-                rb.velocity = new Vector2(facing * dashSpeed, 0);
-            }
-            else
-            {
-                isDashing = false;
-            }
         }
     }
 
