@@ -21,11 +21,16 @@ public class InputManager : MonoBehaviour
         }
 
         //default keybinds
-        keybinds["Jump"] = KeyCode.W;
-        keybinds["Attack"] = KeyCode.LeftControl;
+        keybinds["MoveLeft"] = KeyCode.A;
+        keybinds["MoveRight"] = KeyCode.D;
+        keybinds["Up"] = KeyCode.W;
+        keybinds["Down"] = KeyCode.S;
+        keybinds["Jump"] = KeyCode.Space;
         keybinds["Dash"] = KeyCode.LeftShift;
-        keybinds["Heal"] = KeyCode.H;
+        keybinds["Heal"] = KeyCode.LeftControl;
 
+        keybinds["Attack"] = KeyCode.J;
+        keybinds["BloodRythm"] = KeyCode.K;
     }
 
     public bool GetKey(string action)
