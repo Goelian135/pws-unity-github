@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     public Animator animator;
 
     //variables
-    public float moveSpeed = 6.0f;
+    public float moveSpeed = 5.0f;
     public float horizontalInput;
     private float lastFacingDir;
     public PlayerController playerController;
@@ -245,10 +245,5 @@ public class PlayerController : MonoBehaviour
     public void Heal(int amount)
     {
         playerHealth.Heal(amount);
-    }
-
-    public void ditdoetniks()
-    {
-        //leeg
     }
 }
