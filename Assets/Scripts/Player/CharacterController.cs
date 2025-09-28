@@ -56,12 +56,20 @@ public class CharacterController : MonoBehaviour
 
     private void Update()
     {
+        //gravity for jump
         Gravity();
 
-        if(!canDash && !isDashing && Time.time > dashTimeStart + dashDuration + dashCooldown)
+        //reset dash
+        if (!canDash && !isDashing && Time.time > dashTimeStart + dashDuration + dashCooldown)
         {
             canDash = true;
         }
+
+        //update animator
+        if (isGrounded)
+        {
+            movement.animator.SetBool("Grounded", true);
+        } else { movement.animator.SetBool("Grounded", false); }
     }
 
     void FixedUpdate()
@@ -93,6 +101,7 @@ public class CharacterController : MonoBehaviour
             //add a vertical force to the player
             isGrounded = false;
             rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+            movement.animator.SetTrigger("Jump");
         }
 
         //check if the player should dash
@@ -101,6 +110,8 @@ public class CharacterController : MonoBehaviour
             dashTimeStart = Time.time;            
             isDashing = true;
             canDash = false;
+            movement.animator.SetTrigger("Dash");
+            movement.animator.SetBool("isDashing", true);
         }
 
         //dash movement
@@ -113,6 +124,7 @@ public class CharacterController : MonoBehaviour
             else
             {
                 isDashing = false;
+                movement.animator.SetBool("isDashing", false);
             }
         }
     }
@@ -134,6 +146,7 @@ public class CharacterController : MonoBehaviour
         //Gravity change based on apex, makes jumping feel better
         if (rb.velocity.y > apexThresehold) //omhoog
         {
+            movement.animator.SetBool("Upward", true);
             if (!InputManager.Instance.GetKey("Jump")) //meteen stoppen met springen
             {
                 rb.gravityScale = fallGravityScale;
@@ -150,6 +163,7 @@ public class CharacterController : MonoBehaviour
         else if (rb.velocity.y < -apexThresehold) //omlaag
         {
             rb.gravityScale = fallGravityScale;
+            movement.animator.SetBool("Upward", false);
         }
     }
 

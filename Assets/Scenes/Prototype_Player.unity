@@ -1571,6 +1571,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6568222200902529568, guid: 7847a46f4b8152d4d81503081f54830a, type: 3}
   m_PrefabInstance: {fileID: 337482941083000267}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &1938002699 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 8403527346254549981, guid: 7847a46f4b8152d4d81503081f54830a, type: 3}
+  m_PrefabInstance: {fileID: 337482941083000267}
+  m_PrefabAsset: {fileID: 0}
 --- !u!61 &1938002703 stripped
 BoxCollider2D:
   m_CorrespondingSourceObject: {fileID: 944858241812565566, guid: 7847a46f4b8152d4d81503081f54830a, type: 3}
@@ -1871,6 +1876,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 5959264709082130525, guid: 7847a46f4b8152d4d81503081f54830a, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 1938002699}
     - target: {fileID: 6294290215264738306, guid: 7847a46f4b8152d4d81503081f54830a, type: 3}
       propertyPath: healthUIParent
       value: 
@@ -1917,7 +1926,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7238611582270178337, guid: 7847a46f4b8152d4d81503081f54830a, type: 3}
       propertyPath: dashForce
-      value: 400
+      value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 7238611582270178337, guid: 7847a46f4b8152d4d81503081f54830a, type: 3}
+      propertyPath: dashSpeed
+      value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 7238611582270178337, guid: 7847a46f4b8152d4d81503081f54830a, type: 3}
+      propertyPath: dashCooldown
+      value: 0.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 7238611582270178337, guid: 7847a46f4b8152d4d81503081f54830a, type: 3}
+      propertyPath: dashDuration
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 7238611582270178337, guid: 7847a46f4b8152d4d81503081f54830a, type: 3}
       propertyPath: bloodRythmBar
