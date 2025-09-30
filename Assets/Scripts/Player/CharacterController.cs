@@ -1,14 +1,15 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterController : MonoBehaviour
+public class CharacterController2D : MonoBehaviour
 {
     [Header ("References")]
     public PlayerHealth health;
     public PlayerMovement movement;
     public BloodRythmBar bloodRythmBar;
-    [SerializeField] private Rigidbody2D rb;
+    public Rigidbody2D rb;
 
     [Header ("Jump variables")]
     [SerializeField] private float jumpForce = 40.0f;
@@ -26,7 +27,7 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private LayerMask whatIsGround;
     [SerializeField] private Transform groundCheck;
     const float groundedRadius = .2f;
-    private bool isGrounded;
+    public bool isGrounded;
 
     //iets voor movement smoothness
     private Vector3 velocity = Vector3.zero;
@@ -37,10 +38,12 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private float dashSpeed = 20f;    
     [SerializeField] private float dashDuration = 0.2f;
     [SerializeField] private float dashCooldown = 1f;
-    private bool isDashing = false;
+    public bool isDashing = false;
     private bool canDash = true;
     private float dashTimeStart;
 
+    public event Action onJump;
+    public event Action onDash;
 
     private void Awake()
     {
@@ -64,12 +67,6 @@ public class CharacterController : MonoBehaviour
         {
             canDash = true;
         }
-
-        //update animator
-        if (isGrounded)
-        {
-            movement.animator.SetBool("Grounded", true);
-        } else { movement.animator.SetBool("Grounded", false); }
     }
 
     void FixedUpdate()
@@ -101,7 +98,8 @@ public class CharacterController : MonoBehaviour
             //add a vertical force to the player
             isGrounded = false;
             rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
-            movement.animator.SetTrigger("Jump");
+
+            onJump?.Invoke();
         }
 
         //check if the player should dash
@@ -110,8 +108,8 @@ public class CharacterController : MonoBehaviour
             dashTimeStart = Time.time;            
             isDashing = true;
             canDash = false;
-            movement.animator.SetTrigger("Dash");
-            movement.animator.SetBool("isDashing", true);
+            
+            onDash?.Invoke();
         }
 
         //dash movement
@@ -124,7 +122,6 @@ public class CharacterController : MonoBehaviour
             else
             {
                 isDashing = false;
-                movement.animator.SetBool("isDashing", false);
             }
         }
     }
@@ -146,24 +143,15 @@ public class CharacterController : MonoBehaviour
         //Gravity change based on apex, makes jumping feel better
         if (rb.velocity.y > apexThresehold) //omhoog
         {
-            movement.animator.SetBool("Upward", true);
-            if (!InputManager.Instance.GetKey("Jump")) //meteen stoppen met springen
-            {
-                rb.gravityScale = fallGravityScale;
-            }
-            else
-            {
-                rb.gravityScale = jumpGravityScale;
-            }
-        }
-        else if (Mathf.Abs(rb.velocity.y) <= apexThresehold) //apex
-        {
-            rb.gravityScale = apexGravityScale;
+            rb.gravityScale = InputManager.Instance.GetKey("Jump") ? jumpGravityScale : gravityScale;
         }
         else if (rb.velocity.y < -apexThresehold) //omlaag
         {
             rb.gravityScale = fallGravityScale;
-            movement.animator.SetBool("Upward", false);
+        }
+        else //apex
+        {
+            rb.gravityScale = apexGravityScale;
         }
     }
 
