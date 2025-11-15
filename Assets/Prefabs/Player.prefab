@@ -76,7 +76,6 @@ GameObject:
   - component: {fileID: 944858241812565566}
   - component: {fileID: 6294290215264738306}
   - component: {fileID: 8403527346254549981}
-  - component: {fileID: 7238611582270178337}
   - component: {fileID: 5959264709082130525}
   m_Layer: 7
   m_Name: Player
@@ -263,37 +262,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &7238611582270178337
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3217877814102263255}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94f716a4d2b69fd4d816a3e80913bf0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  health: {fileID: 6294290215264738306}
-  movement: {fileID: 5959264709082130525}
-  bloodRythmBar: {fileID: 0}
-  jumpForce: 13
-  gravityScale: 3
-  jumpGravityScale: 2
-  fallGravityScale: 5
-  apexGravityScale: 1.5
-  apexThresehold: 0.7
-  crouchSpeed: 0.36
-  movementSmoothing: 0.05
-  whatIsGround:
-    serializedVersion: 2
-    m_Bits: 64
-  groundCheck: {fileID: 5681278009106569752}
-  ceilingCheck: {fileID: 5219099710010011800}
-  crouchDisableCollider: {fileID: 944858241812565566}
-  rb: {fileID: 9002537803378355680}
-  isGrounded: 0
 --- !u!114 &5959264709082130525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -306,6 +274,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78c582ed68632904e955caa2b47e2512, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controller: {fileID: 7238611582270178337}
+  controller: {fileID: 0}
   runSpeed: 40
-  crouch: 0
