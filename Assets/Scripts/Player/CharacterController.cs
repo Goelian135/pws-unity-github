@@ -59,6 +59,9 @@ public class CharacterController2D : MonoBehaviour
 
     private void Update()
     {
+        //check if grounded
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundedRadius, whatIsGround);
+
         //gravity for jump
         Gravity();
 
@@ -69,60 +72,57 @@ public class CharacterController2D : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
-    {
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundedRadius, whatIsGround);
-    }
-
     public void Move(float move, bool jump, bool dash)
     {
-        //move the character
+        //no movement control while dashing
+        if (isDashing)
+        {
+            HandleDashMovement();
+            return;
+        }
+
+        //movement
         Vector3 targetVelocity = new Vector2(move * 10f, rb.velocity.y);
-        //smooth the movement
         rb.velocity = Vector3.SmoothDamp(rb.velocity, targetVelocity, ref velocity, movementSmoothing);
 
-        //if input is making the player move left and the player is facing right
-        if (move < 0 && facing > 0)
-        {
-            Flip();
-        }
-        //if input is making the player move right and the player is facing left
-        else if (move > 0 && facing < 0)
-        {
-            Flip();
-        }
+        //flip the character's facing direction
+        if (move < 0 && facing > 0) Flip();
+        else if (move > 0 && facing < 0) Flip();
 
-        //if the player should jump
+        //jump
         if (jump && isGrounded)
         {
-            //add a vertical force to the player
             isGrounded = false;
-            rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
 
             onJump?.Invoke();
         }
 
-        //check if the player should dash
+        //Dash
         if (dash && !isDashing && canDash)
         {
-            dashTimeStart = Time.time;            
+            dashTimeStart = Time.time;
             isDashing = true;
             canDash = false;
-            
+
+            rb.gravityScale = 0; //disable gravity during dash
+
             onDash?.Invoke();
         }
+    }
 
-        //dash movement
-        if (isDashing)
-        {
-            if (Time.time < dashTimeStart + dashDuration)
+    private void HandleDashMovement()
+    {
+        if (Time.time < dashTimeStart + dashDuration)
             {
                 rb.velocity = new Vector2(facing * dashSpeed, 0);
             }
-            else
-            {
-                isDashing = false;
-            }
+        else
+        {
+            isDashing = false;
+
+            rb.gravityScale = gravityScale; //re-enable gravity after dash
         }
     }
 
@@ -140,12 +140,15 @@ public class CharacterController2D : MonoBehaviour
     private void Gravity()
     ///Change the gravity scale based on whether the player is going up, down or at the apex of their jump
     {
-        //Gravity change based on apex, makes jumping feel better
-        if (rb.velocity.y > apexThresehold) //omhoog
+        float yVel = rb.velocity.y;
+
+        if(isDashing) return; //no gravity change while dashing
+
+        if (yVel > apexThresehold) //omhoog
         {
             rb.gravityScale = InputManager.Instance.GetKey("Jump") ? jumpGravityScale : gravityScale;
         }
-        else if (rb.velocity.y < -apexThresehold) //omlaag
+        else if (yVel < -apexThresehold) //omlaag
         {
             rb.gravityScale = fallGravityScale;
         }
