@@ -5,12 +5,12 @@ using UnityEngine;
 public class PlayerAnimator : MonoBehaviour
 {
     [Header ("References")]
-    public CharacterController2D controller;
+    public CharacterController controller;
     public Animator animator;
 
     private void Start()
     {
-        if (controller == null) { controller = GetComponentInParent<CharacterController2D>(); }
+        if (controller == null) { controller = GetComponentInParent<CharacterController>(); }
         if (animator == null) { animator = GetComponent<Animator>(); }
     }
 
@@ -47,7 +47,7 @@ public class PlayerAnimator : MonoBehaviour
         else { animator.SetBool("isDashing", false); }
 
         //checks if player is going up or down
-        if (controller.rb.velocity.y > controller.apexThresehold)
+        if (controller.rb.velocity.y > controller.apexThreshold)
         {
             animator.SetBool("Upward", true);
         }

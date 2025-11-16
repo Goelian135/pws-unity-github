@@ -1,161 +1,221 @@
+﻿using UnityEngine;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
-public class CharacterController2D : MonoBehaviour
+[System.Serializable]
+public struct MoveInput
 {
-    [Header ("References")]
-    public PlayerHealth health;
-    public PlayerMovement movement;
-    public BloodRythmBar bloodRythmBar;
+    public float horizontal;   // -1 t/m 1
+    public bool jumpPressed;   // edge press
+    public bool jumpHeld;      // held down
+    public bool dashPressed;   // edge press
+}
+
+public class CharacterController : MonoBehaviour
+{
+    [Header("References")]
     public Rigidbody2D rb;
-
-    [Header ("Jump variables")]
-    [SerializeField] private float jumpForce = 40.0f;
-    public float gravityScale = 3.0f;
-    public float jumpGravityScale = 2.0f;
-    public float fallGravityScale = 5.0f;
-    public float apexGravityScale = 1.5f;
-    public float apexThresehold = 0.2f;
-
-    [Header("")]
-    // How much to smooth out the movement
-    [Range(0, .3f)][SerializeField] private float movementSmoothing = .05f;
-
-    [Header("Groundcheck")]
-    [SerializeField] private LayerMask whatIsGround;
-    [SerializeField] private Transform groundCheck;
-    const float groundedRadius = .2f;
-    public bool isGrounded;
-
-    //iets voor movement smoothness
-    private Vector3 velocity = Vector3.zero;
-
-    private int facing = 1; //1 for right, -1 for left
-
-    [Header ("Dash variables")]
-    [SerializeField] private float dashSpeed = 20f;    
-    [SerializeField] private float dashDuration = 0.2f;
-    [SerializeField] private float dashCooldown = 1f;
-    public bool isDashing = false;
-    private bool canDash = true;
-    private float dashTimeStart;
+    public Transform groundCheck;
+    public LayerMask groundMask;
 
     public event Action onJump;
     public event Action onDash;
 
-    private void Awake()
+    // ---------------------------------------------------------
+    // Movement settings
+    // ---------------------------------------------------------
+
+    [Header("Movement")]
+    public float moveSpeed = 12f;
+    public float acceleration = 20f;
+    public float deceleration = 30f;
+
+    [Header("Jump")]
+    public float jumpForce = 22f;
+    public float apexThreshold = 0.2f;
+
+    [Header("Gravity")]
+    public float normalGravity = 3f;
+    public float jumpGravity = 2f;
+    public float fallGravity = 5f;
+    public float apexGravity = 1.2f;
+
+    [Header("Coyote Time")]
+    public float coyoteTime = 0.15f;
+    private float coyoteTimer = 0f;
+
+    [Header("Jump Buffer")]
+    public float jumpBufferTime = 0.15f;
+    private float jumpBufferTimer = 0f;
+
+    [Header("Dash")]
+    public float dashSpeed = 25f;
+    public float dashDuration = 0.15f;
+    public float dashCooldown = 0.5f;
+    public bool isDashing = false;
+    private bool canDash = true;
+    private float dashTimer = 0f;
+
+    // ---------------------------------------------------------
+
+    private float targetVelocityX = 0f;
+    private int facing = 1;
+
+    void Awake()
     {
-        rb = GetComponent<Rigidbody2D>();
-        if (health == null)
-            health = GetComponent<PlayerHealth>();
-        if (movement == null)
-            movement = GetComponent<PlayerMovement>();
-        if (bloodRythmBar == null)
-            bloodRythmBar = GetComponent<BloodRythmBar>();
+        if (!rb) rb = GetComponent<Rigidbody2D>();
     }
 
+    // ---------------------------------------------------------
+    // PUBLIC UPDATE CALLED BY PlayerMovement / InputManager
+    // ---------------------------------------------------------
 
-    private void Update()
+    public void ApplyInput(MoveInput input)
     {
-        //check if grounded
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundedRadius, whatIsGround);
+        HandleTimers();
+        GroundCheck();
 
-        //gravity for jump
-        Gravity();
+        // Jump buffer & coyote
+        if (input.jumpPressed)
+            jumpBufferTimer = jumpBufferTime;
 
-        //reset dash
-        if (!canDash && !isDashing && Time.time > dashTimeStart + dashDuration + dashCooldown)
-        {
-            canDash = true;
-        }
-    }
+        bool doJump = jumpBufferTimer > 0 && coyoteTimer > 0;
 
-    public void Move(float move, bool jump, bool dash)
-    {
-        //no movement control while dashing
+        // Dash
+        if (input.dashPressed && canDash && !isDashing)
+            StartDash();
+
         if (isDashing)
         {
-            HandleDashMovement();
-            return;
+            HandleDash();
+            return; // no normal movement while dashing
         }
 
-        //movement
-        Vector3 targetVelocity = new Vector2(move * 10f, rb.velocity.y);
-        rb.velocity = Vector3.SmoothDamp(rb.velocity, targetVelocity, ref velocity, movementSmoothing);
+        // Movement
+        HandleMovement(input.horizontal);
 
-        //flip the character's facing direction
-        if (move < 0 && facing > 0) Flip();
-        else if (move > 0 && facing < 0) Flip();
-
-        //jump
-        if (jump && isGrounded)
+        // Jumping
+        if (doJump)
         {
-            isGrounded = false;
+            jumpBufferTimer = 0;
+            coyoteTimer = 0;
 
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-
             onJump?.Invoke();
         }
 
-        //Dash
-        if (dash && !isDashing && canDash)
-        {
-            dashTimeStart = Time.time;
-            isDashing = true;
-            canDash = false;
-
-            rb.gravityScale = 0; //disable gravity during dash
-
-            onDash?.Invoke();
-        }
+        HandleGravity(input.jumpHeld);
     }
 
-    private void HandleDashMovement()
+    // ---------------------------------------------------------
+
+    void HandleMovement(float horizontal)
     {
-        if (Time.time < dashTimeStart + dashDuration)
-            {
-                rb.velocity = new Vector2(facing * dashSpeed, 0);
-            }
+        // Flip direction
+        if (horizontal > 0.1f && facing < 0) Flip();
+        if (horizontal < -0.1f && facing > 0) Flip();
+
+        // Smooth accel / decel
+        if (Mathf.Abs(horizontal) > 0.05f)
+        {
+            targetVelocityX = Mathf.MoveTowards(rb.velocity.x, horizontal * moveSpeed, acceleration * Time.deltaTime);
+        }
         else
         {
-            isDashing = false;
-
-            rb.gravityScale = gravityScale; //re-enable gravity after dash
+            targetVelocityX = Mathf.MoveTowards(rb.velocity.x, 0f, deceleration * Time.deltaTime);
         }
+
+        rb.velocity = new Vector2(targetVelocityX, rb.velocity.y);
     }
 
-    private void Flip()
+    // ---------------------------------------------------------
+
+    void HandleGravity(bool jumpHeld)
     {
-        //switch the way the player is labelled as facing
+        if (isDashing) return;
+
+        float y = rb.velocity.y;
+
+        if (y > apexThreshold)
+            rb.gravityScale = jumpHeld ? jumpGravity : normalGravity;
+        else if (y < -apexThreshold)
+            rb.gravityScale = fallGravity;
+        else
+            rb.gravityScale = apexGravity;
+    }
+
+    // ---------------------------------------------------------
+
+    void HandleTimers()
+    {
+        if (!isGrounded)
+            coyoteTimer -= Time.deltaTime;
+        else
+            coyoteTimer = coyoteTime;
+
+        if (jumpBufferTimer > 0)
+            jumpBufferTimer -= Time.deltaTime;
+
+        if (!canDash)
+            dashTimer -= Time.deltaTime;
+
+        if (dashTimer <= 0 && !isDashing)
+            canDash = true;
+    }
+
+    // ---------------------------------------------------------
+
+    public bool isGrounded = false;
+
+    void GroundCheck()
+    {
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.15f, groundMask);
+    }
+
+    // ---------------------------------------------------------
+
+    void StartDash()
+    {
+        isDashing = true;
+        canDash = false;
+        dashTimer = dashCooldown;
+
+        rb.gravityScale = 0;
+        rb.velocity = new Vector2(facing * dashSpeed, 0);
+
+        onDash?.Invoke();
+
+        Invoke(nameof(StopDash), dashDuration);
+    }
+
+    void HandleDash()
+    {
+        rb.velocity = new Vector2(facing * dashSpeed, 0);
+    }
+
+    void StopDash()
+    {
+        isDashing = false;
+        rb.gravityScale = normalGravity;
+    }
+
+    // ---------------------------------------------------------
+
+    void Flip()
+    {
         facing *= -1;
 
-        //multiply the player's x local scale by -1
-        Vector3 theScale = transform.localScale;
-        theScale.x *= -1;
-        transform.localScale = theScale;
+        // ⚠️ Later: put sprite in a child and flip only that child
+        transform.localScale = new Vector3(facing, 1, 1);
     }
 
-    private void Gravity()
-    ///Change the gravity scale based on whether the player is going up, down or at the apex of their jump
+    // ---------------------------------------------------------
+
+    private void OnDrawGizmosSelected()
     {
-        float yVel = rb.velocity.y;
-
-        if(isDashing) return; //no gravity change while dashing
-
-        if (yVel > apexThresehold) //omhoog
+        if (groundCheck)
         {
-            rb.gravityScale = InputManager.Instance.GetKey("Jump") ? jumpGravityScale : gravityScale;
-        }
-        else if (yVel < -apexThresehold) //omlaag
-        {
-            rb.gravityScale = fallGravityScale;
-        }
-        else //apex
-        {
-            rb.gravityScale = apexGravityScale;
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(groundCheck.position, 0.15f);
         }
     }
-
 }

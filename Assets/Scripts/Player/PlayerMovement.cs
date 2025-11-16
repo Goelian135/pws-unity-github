@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public CharacterController2D controller;
+    public CharacterController controller;
 
     float horizontalMove = 0f;
     public float runSpeed = 40f;
 
-    bool jump = false;
-    bool dash = false;
+    bool jumpPressed = false;
+    bool jumpHeld = false;
+    bool dashPressed = false;
 
     // Update is called once per frame
     void Update()
@@ -21,20 +22,31 @@ public class PlayerMovement : MonoBehaviour
 
         if (InputManager.Instance.GetKeyDown("Jump"))
         {
-            jump = true;
+            jumpPressed = true;
         }
+
+        jumpHeld = InputManager.Instance.GetKey("Jump");
 
         if (InputManager.Instance.GetKeyDown("Dash"))
         {
-            dash = true;
+            dashPressed = true;
         }
     }
 
     private void FixedUpdate()
     {
-        //move the character
-        controller.Move(horizontalMove *runSpeed *Time.fixedDeltaTime, jump, dash);
-        jump = false;
-        dash = false;
+        MoveInput input = new MoveInput
+        {
+            horizontal = horizontalMove,
+            jumpPressed = jumpPressed,
+            jumpHeld = jumpHeld,
+            dashPressed = dashPressed
+        };
+
+        controller.ApplyInput(input);
+
+        // Reset edge-press inputs
+        jumpPressed = false;
+        dashPressed = false;
     }
 }
