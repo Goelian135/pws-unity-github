@@ -19,6 +19,12 @@ public class CharacterController2D : MonoBehaviour
     public float apexGravityScale = 1.5f;
     public float apexThresehold = 0.2f;
 
+    [Header ("Jump assist")]
+    [SerializeField] private float coyoteTime = 0.15f;
+    [SerializeField] private float jumpBufferTime = 0.15f;
+    private float coyoteTimer;
+    private float jumpBufferTimer;
+
     [Header("")]
     // How much to smooth out the movement
     [Range(0, .3f)][SerializeField] private float movementSmoothing = .05f;
@@ -32,7 +38,7 @@ public class CharacterController2D : MonoBehaviour
     //iets voor movement smoothness
     private Vector3 velocity = Vector3.zero;
 
-    private int facing = 1; //1 for right, -1 for left
+    public int facing = 1; //1 for right, -1 for left
 
     [Header ("Dash variables")]
     [SerializeField] private float dashSpeed = 20f;    
@@ -62,6 +68,23 @@ public class CharacterController2D : MonoBehaviour
         //check if grounded
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundedRadius, whatIsGround);
 
+        //coyote timer
+        if (isGrounded) {
+            coyoteTimer = coyoteTime; //reset coyote timer
+        } else {
+            coyoteTimer -= Time.deltaTime;
+        }
+
+        //jump buffer timer
+        if (InputManager.Instance.GetKeyDown("Jump"))
+        {
+            jumpBufferTimer = jumpBufferTime; //reset jump buffer timer
+        }
+        else
+        {
+            jumpBufferTimer -= Time.deltaTime;
+        }
+
         //gravity for jump
         Gravity();
 
@@ -90,12 +113,15 @@ public class CharacterController2D : MonoBehaviour
         else if (move > 0 && facing < 0) Flip();
 
         //jump
-        if (jump && isGrounded)
+        bool canJump = (coyoteTimer > 0) && (jumpBufferTimer > 0);
+
+        if (canJump)
         {
+            coyoteTimer = 0;
+            jumpBufferTimer = 0;
+
             isGrounded = false;
-
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-
             onJump?.Invoke();
         }
 
