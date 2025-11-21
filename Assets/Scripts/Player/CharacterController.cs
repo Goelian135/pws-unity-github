@@ -7,7 +7,6 @@ public class CharacterController2D : MonoBehaviour
 {
     [Header ("References")]
     public PlayerHealth health;
-    public PlayerMovement movement;
     public BloodRythmBar bloodRythmBar;
     public Rigidbody2D rb;
 
@@ -45,7 +44,7 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private float dashDuration = 0.2f;
     [SerializeField] private float dashCooldown = 1f;
     public bool isDashing = false;
-    private bool canDash = true;
+    public bool canDash = true;
     private float dashTimeStart;
 
     public event Action onJump;
@@ -56,8 +55,6 @@ public class CharacterController2D : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         if (health == null)
             health = GetComponent<PlayerHealth>();
-        if (movement == null)
-            movement = GetComponent<PlayerMovement>();
         if (bloodRythmBar == null)
             bloodRythmBar = GetComponent<BloodRythmBar>();
     }
@@ -89,7 +86,7 @@ public class CharacterController2D : MonoBehaviour
         Gravity();
 
         //reset dash
-        if (!canDash && !isDashing && Time.time > dashTimeStart + dashDuration + dashCooldown)
+        if (!canDash && !isDashing && Time.time > dashTimeStart + dashDuration + dashCooldown && isGrounded)
         {
             canDash = true;
         }

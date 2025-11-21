@@ -10,7 +10,7 @@ public class SwordFollow : MonoBehaviour
     public float offsetY = 0.5f;
 
     [Header("Smoothness")]
-    public float smoothTime = 0.15f;
+    public float smoothTime = 0.15f;        
 
     private Vector3 velocity = Vector3.zero;
 
