@@ -50,13 +50,4 @@ public class InputManager : MonoBehaviour
         }
         return false;
     }
-
-    public bool GetKeyUp(string action)
-    {
-        if (keybinds.ContainsKey(action))
-        {
-            return Input.GetKeyUp(keybinds[action]);
-        }
-        return false;
-    }
 }
