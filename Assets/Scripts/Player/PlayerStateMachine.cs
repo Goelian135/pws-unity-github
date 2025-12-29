@@ -13,6 +13,7 @@ public class PlayerStateMachine : MonoBehaviour
     public PlayerJumpState JumpState { get; private set; }
     public PlayerFallState FallState { get; private set; }
     public PlayerDashState DashState { get; private set; }
+    public PlayerAttackState AttackState { get; private set; }
 
     // referenties naar andere scripts
     public CharacterController2D controller;
@@ -33,6 +34,7 @@ public class PlayerStateMachine : MonoBehaviour
         JumpState = new PlayerJumpState(this, controller, input, rb);
         FallState = new PlayerFallState(this, controller, input, rb);
         DashState = new PlayerDashState(this, controller, input, rb);
+        AttackState = new PlayerAttackState(this, controller, input, rb);
     }
 
     private void Start()

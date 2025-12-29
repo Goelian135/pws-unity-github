@@ -41,6 +41,13 @@ public class PlayerRunState : PlayerState
             machine.ChangeState(machine.DashState);
             return;
         }
+
+        //naar attack
+        if (input.AttackPressed)
+        {
+            machine.ChangeState(machine.AttackState);
+            return;
+        }
     }
 
     public override void FixedUpdate()
