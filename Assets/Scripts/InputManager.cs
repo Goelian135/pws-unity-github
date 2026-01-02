@@ -31,7 +31,6 @@ public class InputManager : MonoBehaviour
 
         keybinds["Attack"] = KeyCode.J;
         keybinds["BloodRythm"] = KeyCode.K;
-
     }
 
     public bool GetKey(string action)
