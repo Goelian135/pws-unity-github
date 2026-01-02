@@ -53,7 +53,7 @@ public class PlayerRunState : PlayerState
     public override void FixedUpdate()
     {
         float move = input.Horizontal;
-        machine.controller.Move(move, false, false);
+        machine.controller.Move(move, false, false, false);
     }
 
     public override void Exit()

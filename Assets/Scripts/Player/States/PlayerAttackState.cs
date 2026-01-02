@@ -14,6 +14,7 @@ public class PlayerAttackState : PlayerState
     public override void Enter()
     {
         timer = attackDuration;
+        controller.Move(0, false, false, true); //trigger attack via controller
     }
 
     public override void Update()
@@ -23,12 +24,17 @@ public class PlayerAttackState : PlayerState
         {
             machine.ChangeState(machine.IdleState);
         }
+
+        else 
+        { 
+        //Zorg dat de speler stilstaat
+        controller.Move(0, false, false, false);
+        }
     }
 
     public override void FixedUpdate()
     {
-        //Zorg dat de speler stilstaat
-        controller.Move(0, false, false);
+        //geen movement tijdens attack
     }
 
     public override void Exit()

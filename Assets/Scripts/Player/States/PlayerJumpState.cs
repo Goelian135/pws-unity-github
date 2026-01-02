@@ -12,7 +12,7 @@ public class PlayerJumpState : PlayerState
         jumpStarted = false;
 
         //trigger sprong via controller
-        controller.Move(0, true, false);
+        controller.Move(0, true, false, false);
         jumpStarted = true;
     }
 
@@ -38,7 +38,7 @@ public class PlayerJumpState : PlayerState
     public override void FixedUpdate()
     {
         float move = input.Horizontal;
-        machine.controller.Move(move, false, false);
+        machine.controller.Move(move, false, false, false);
     }
 
     public override void Exit()

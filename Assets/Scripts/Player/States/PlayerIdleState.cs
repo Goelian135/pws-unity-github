@@ -53,7 +53,7 @@ public class PlayerIdleState : PlayerState
     public override void FixedUpdate()
     {
         //Zorg dat de speler stilstaat
-        controller.Move(0, false, false);
+        controller.Move(0, false, false, false);
     }
 
     public override void Exit()

@@ -11,5 +11,10 @@ public class WeaponHitbox : MonoBehaviour
         {
             health.TakeDamage(damage);
         }
+
+        if (other.TryGetComponent<BossController>(out BossController bossHealth))
+        {
+            bossHealth.TakeDamage(damage);
+        }
     }
 }

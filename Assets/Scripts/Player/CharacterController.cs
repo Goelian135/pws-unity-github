@@ -49,6 +49,7 @@ public class CharacterController2D : MonoBehaviour
 
     public event Action onJump;
     public event Action onDash;
+    public event Action onAttack;
 
     private void Awake()
     {
@@ -92,7 +93,7 @@ public class CharacterController2D : MonoBehaviour
         }
     }
 
-    public void Move(float move, bool jump, bool dash)
+    public void Move(float move, bool jump, bool dash, bool attack)
     {
         //no movement control while dashing
         if (isDashing)
@@ -132,6 +133,11 @@ public class CharacterController2D : MonoBehaviour
             rb.gravityScale = 0; //disable gravity during dash
 
             onDash?.Invoke();
+        }
+
+        if (attack)
+        {
+            onAttack?.Invoke();
         }
     }
 

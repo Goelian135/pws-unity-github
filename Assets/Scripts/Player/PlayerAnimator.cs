@@ -18,12 +18,14 @@ public class PlayerAnimator : MonoBehaviour
     {
         controller.onJump += Jump;
         controller.onDash += Dash;
+        controller.onAttack += Attack;
     }
 
     private void OnDisable()
     {
         controller.onJump -= Jump;
         controller.onDash -= Dash;
+        controller.onAttack -= Attack;
     }
 
     // Update is called once per frame
@@ -65,5 +67,10 @@ public class PlayerAnimator : MonoBehaviour
     private void Dash()
     {
         animator.SetTrigger("Dash");
+    }
+
+    private void Attack()
+    {
+        animator.SetTrigger("AttackOne");
     }
 }

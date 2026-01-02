@@ -10,7 +10,7 @@ public class PlayerDashState : PlayerState
 
     public override void Enter()
     {
-        controller.Move(0, false, true); //trigger dash via controller
+        controller.Move(0, false, true, false); //trigger dash via controller
     }
 
     public override void Update()
@@ -34,7 +34,7 @@ public class PlayerDashState : PlayerState
 
         else
         {
-            controller.Move(0, false, true); //zorg dat dash afgemaakt wordt
+            controller.Move(0, false, true, false); //zorg dat dash afgemaakt wordt
         }
     }
 
